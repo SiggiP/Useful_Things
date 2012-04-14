@@ -11,16 +11,23 @@
 <!--
 jQuery(document).ready(function(){
  
- jQuery('.jq-unique-selectbox').advancedSelect().advancedSelect('makeunique');
+ jQuery('.jq-unique-selectbox').uniqueSelect();
  jQuery('.jq-unique-switch').on('click', function(){
-   jQuery('.jq-unique-selectbox').advancedSelect(jQuery(this).attr('name'));
+   jQuery('.jq-unique-selectbox').uniqueSelect(jQuery(this).attr('name'));
    return false;
  });
-});
+ 
+ jQuery('.jq-moving-selectbox').movableSelect();
+ 
+}); /* end ready-function */
 
 -->
 </script>
+<style>
+legend {font-weight:bold;}
+select {width: 15em;}
 
+</style>
 </head>
 <body>
 
@@ -54,6 +61,20 @@ jQuery(document).ready(function(){
 
 </fieldset>
 
+<fieldset>
+<legend>Move items between boxes</legend>
+    <div>Doubleclick on Item to move/copy from left to right</div>
+    <select class="jq-moving-selectbox" size="4" name="select4">
+    <option value="1">Erster Wert</option>
+    <option value="2">Zweiter Wert</option>
+    <option value="3">Dritter Wert</option>
+    <option value="4">Vierter Wert</option>
+    </select>
+    
+    <select class="jq-moving-selectbox" size="4" name="select5">
+    
+    </select>
+</fieldset>
 
 </body>
 </html>
