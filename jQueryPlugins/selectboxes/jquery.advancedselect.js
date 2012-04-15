@@ -1,9 +1,14 @@
 /**
- * 1. plugin:
- * only select options with the same value once in a set
+ * A set of Jquery-Plugins to handle Selectboxes
+ * @author  siggip
+ */
+
+/**
+ * 1. plugin: uniqueSelectbox
+ * Only select options with the same value once in a set
  * of multiple selectboxes
  * 
- * @version  1.0.1
+ * @version  1.1.0
  * 
  * @requires jquery > 1.7.1 
  * @requires jquery.selectboxes.js - Plugin by Sam Collett
@@ -16,7 +21,6 @@
  */
 ;
 (function($) {
-  var items = [];
   /* Default Options */
   var options = {/* later */};
   var methods = {
@@ -24,32 +28,29 @@
       // extending options
       options = $.extend(options, opts);
       return this.each(function() {
-            items.push(this);
           }).uniqueSelect('makeunique');
-
     },
     destroy : function() {
       return this.each(function() {
-            $.each(items, function(i, obj) {
-                  $(obj).unbind('change')
-                });
+            $(this).unbind('change');            
           });
     },
     /* unique selectboxes */
-    makeunique : function() {     
-      $.each(items, function(i, obj) {
-        $(obj).on('change', function() {
-          var _that = this;
-          var _thatSelected = $(this).val() != null ? $(this).val()
+    makeunique : function() {
+      var selectboxes = $(this);	
+      $(selectboxes).each(function() {
+        $(this).on('change', function() {
+          var _changedBox = this;
+          var _changedBoxSelected = $(_changedBox).val() != null ? $(_changedBox).val()
               .toString().split(',') : '';
-          $.each(items, function(j, obj2) {
-                if (i == j) {
+          $(selectboxes).each(function() {
+                if(_changedBox == this) {
                   return true; /* continue */
                 }
-                $(obj2).find('option:selected').each(
+                $(this).find('option:selected').each(
                     function() {
                       if (-1 != $.inArray($(this).val(),
-                          _thatSelected)) {
+                          _changedBoxSelected)) {
                         $(this).prop('selected', false);
                       }
                     });
@@ -58,9 +59,6 @@
       });
     }
   };
-  /**
-   * plugin authoring described at jquery.com
-   */
   $.fn.uniqueSelect = function(method) {
 
     if (methods[method]) {
@@ -80,7 +78,7 @@
  * 2. plugin:
  * move options between 2 selectboxes
  * 
- * @version  0.0.1
+ * @version  1.0.0
  * 
  * @requires jquery > 1.7.1 
  * @requires jquery.selectboxes.js - Plugin by Sam Collett
@@ -92,57 +90,50 @@
  * 
  */
 (function($) {
-  var items = [];
   /* Default Options */
   var options = {/* later */};
   var methods = {
     init : function(opts) {
       // extending options
       options = $.extend(options, opts);
-      return this.each(function() {
-            items.push(this);
+      return $(this).each(function() {            
           }).movableSelect('makemovable');
-
     },
     destroy : function() {
       return this.each(function() {
-            $.each(items, function(i, obj) {
-                  $(obj).unbind('dblclick')
+            $(this).each(function() {
+                  $(this).unbind('dblclick')
                 });
           });
     },
     /* movable options selectboxes */
-    makemovable : function() {     
-      $.each(items, function(i, obj) {
-        $.log('item'+i+': '+$(obj).attr('name'));
-        // var _that = this;
-        $(obj).find('option').on('dblclick', function(){_move(this,obj);});
+    makemovable : function() {
+      var selectboxes = $(this);	
+      $(selectboxes).each(function() {
+        $.log('item'+$(this).attr('class')+': '+$(this).attr('name'));
+        $(this).find('option').on('dblclick', function(){_move(selectboxes, this);});
       });
     }
   };
   /**
    * @access private
    */
-  function _move() {            
-            var _clicked = $(arguments[0]);
-            var obj = arguments[1];
-            $.log('doubleclicked: '+$(_clicked).val()+':'+$(_clicked).html());
-            
-            $.each(items, function(j,obj2){
-                if(obj2 == obj){
-                    var _selectbox = $(_clicked).parent('select');
-                    $.log(' remove '+_clicked.val()+':'+_clicked.text()+' from '+_selectbox.attr('name'));
-                    $(_selectbox).removeOption(_clicked.val());                    
+  function _move(selectboxes, _clicked) {
+            var _clickedSelectbox = $(_clicked).parent('select');
+            $(selectboxes).each(function(){
+                var _obj2 = $(this);
+                if(!$(_obj2).attr('name') || !$(_clickedSelectbox).attr('name')){
+                    return true; /* skip */
+                }
+                if($(_obj2).attr('name') == $(_clickedSelectbox).attr('name')){
+                    var _selectbox = $(_clickedSelectbox).unbind('dblclick');
+                    $(_selectbox).removeOption($(_clicked).val()).find('option');                    
                 }else{
-                    $.log(' add '+_clicked.val()+':'+_clicked.text()+' to '+$(obj2).attr('name'));
-                    $(obj2).addOption(_clicked.val(),_clicked.text()).find('option').on('dblclick', function(){_move(this,obj2);});
-                    $(obj2).sortOptions();
+                    $(_obj2).addOption($(_clicked).val(),$(_clicked).text());
+                    $(_obj2).find('option').on('dblclick', function(){_move(selectboxes, this);});
                 }
             });  
   };
-  /**
-   * plugin authoring described at jquery.com
-   */
   $.fn.movableSelect = function(method) {
 
     if (methods[method]) {
