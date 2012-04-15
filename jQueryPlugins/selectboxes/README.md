@@ -7,4 +7,4 @@ Will be added next.
 
 ##### Examples
 
-Try it out on this [Link](http://www.tgwnn.de/Useful_Things/selectboxes)
+Try it out on this [Link](http://www.tgwnn.de/Useful_Things/selectboxes/examples.html)
