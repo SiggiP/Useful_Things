@@ -78,7 +78,7 @@
  * 2. plugin:
  * move options between 2 selectboxes
  * 
- * @version  1.0.0
+ * @version  1.1.0
  * 
  * @requires jquery > 1.7.1 
  * @requires jquery.selectboxes.js - Plugin by Sam Collett
@@ -110,7 +110,7 @@
     makemovable : function() {
       var selectboxes = $(this);
       $(selectboxes).each(function() {
-        $.log('item'+$(this).attr('class')+': '+$(this).attr('name'));
+        // $.log('item'+$(this).attr('class')+': '+$(this).attr('name'));
         var _that = this;
         $(this).find('option').one('dblclick', function(){ 
             _move(selectboxes, this);
@@ -123,7 +123,7 @@
    */
   function _move(selectboxes, _clicked) {
             var _clickedSelectbox = $(_clicked).parent('select');
-            $(selectboxes).each(function(){
+            $.when($(selectboxes).each(function(){
                 var _obj2 = $(this);
                 if(!$(_obj2).attr('name') || !$(_clickedSelectbox).attr('name')){
                     return true; /* skip */
@@ -136,21 +136,76 @@
                     $(_obj2).addOption($(_clicked).val(),$(_clicked).text());
                     $(_obj2).find('option').one('dblclick', function(){ 
                         _move(selectboxes, this);
-                        // $.when(_move(selectboxes, this)).done(function(boxes, _that){_sort(boxes,_that, 'val')});
-                        // _sort(selectboxes,this, 'val');
                     });
                 }
+            })).done(function(){
+                if($(_clickedSelectbox).attr('name')){
+                    _sort(selectboxes,$(_clickedSelectbox).attr('name'), {});
+                }
             });
-            if($(_clickedSelectbox).attr('name')){
-                _sort(selectboxes,_clicked, 'val');
-            }
+            
   };
   /**
    * Sortieren der Selectboxes
-   * @param string  - sortby: val | text
+   * @param obj  - options = {sortby: 'val' | 'text', asc: true | false}
    */
-  function _sort(selectboxes,_clicked, sortby){
-        $.log('Sorting selectboxes '+$(selectboxes).length+' by '+sortby); 
+  function _sort(selectboxes,_clickedName, options){
+        // $.log('Sorting selectboxes '+$(selectboxes).length+' by '+sortby);
+        // $.log('clicked: '+_clickedName);
+        
+        opts = $.extend({sortby: 'val', asc: true});
+        
+        $(selectboxes).each(function(){            
+            if(_clickedName == $(this).attr('name')){
+                return true; 
+            }
+            
+            var sortedOptions = [];
+                        
+            $(this).find('option').each(function(){
+                
+                // $.log('option2sort: '+$(this).val()+' = '+$(this).text()+' by '+opts.sortby);
+                
+                sortedOptions.push({value: $(this).val(), text: $(this).text()});
+                
+                // sort items in array
+                sortedOptions.sort(
+                    function(o1, o2)
+                    {
+                        // option text is made lowercase for case insensitive sorting
+                        if(opts.sortby == 'text'){
+                            o1t = o1.text.toLowerCase(), o2t = o2.text.toLowerCase();
+                            // if options are the same, no sorting is needed
+                            if(o1t == o2t) return 0;
+                            if(a)
+                            {
+                                return o1t < o2t ? -1 : 1;
+                            }
+                            else
+                            {
+                                return o1t > o2t ? -1 : 1;
+                            }
+                        }else{
+                            o1v = o1.value.toLowerCase(), o2v = o2.value.toLowerCase();
+                            // if options are the same, no sorting is needed
+                            if(o1v == o2v) return 0;
+                            if(opts.asc)
+                            {
+                                return o1v < o2v ? -1 : 1;
+                            }
+                            else
+                            {
+                                return o1v > o2v ? -1 : 1;
+                            }
+                        }                        
+                    }
+                );
+            }); // end each option
+            $(this).find('option').each(function(i,obj){
+                    $(obj).text(sortedOptions[i].text);
+                    $(obj).val(sortedOptions[i].value);
+            });
+        });
   };
   $.fn.movableSelect = function(method) {
 
