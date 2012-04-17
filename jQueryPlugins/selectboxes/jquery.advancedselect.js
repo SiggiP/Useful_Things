@@ -119,6 +119,8 @@
     }
   };
   /**
+   * @param  object -   selectboxes
+   * @param  object -   clicked option
    * @access private
    */
   function _move(selectboxes, _clicked) {
@@ -147,7 +149,10 @@
   };
   /**
    * Sortieren der Selectboxes
-   * @param obj  - options = {sortby: 'val' | 'text', asc: true | false}
+   * @param  object  -   selectboxes
+   * @param  string  -   name of selectbox of the clicked option element
+   * @param  object  - options = {sortby: 'val' | 'text', asc: true | false}
+   * @access private
    */
   function _sort(selectboxes,_clickedName, options){
         // $.log('Sorting selectboxes '+$(selectboxes).length+' by '+sortby);
@@ -170,8 +175,7 @@
                 
                 // sort items in array
                 sortedOptions.sort(
-                    function(o1, o2)
-                    {
+                    function(o1, o2){
                         // option text is made lowercase for case insensitive sorting
                         if(opts.sortby == 'text'){
                             o1t = o1.text.toLowerCase(), o2t = o2.text.toLowerCase();
