@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2012 Sigurd Päßler (http://www.tgwnn.de , https://github.com/SiggiP)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ * 
  * A set of Jquery-Plugins to handle Selectboxes
  * @author  siggip
  */
@@ -11,10 +15,6 @@
  * @version  1.1.0
  * 
  * @requires jquery > 1.7.1 
- * @requires jquery.selectboxes.js - Plugin by Sam Collett
- *           (http://www.texotela.co.uk)
- * @requires jquery.log.js - Plugin by Amal Samally [amal.samally(at)gmail.com]
- *           http://plugins.jquery.com/project/jQueryLog
  * @author siggip
  * @url https://github.com/SiggiP/Useful_Things
  * 
