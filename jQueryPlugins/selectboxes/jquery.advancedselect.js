@@ -102,16 +102,19 @@
     destroy : function() {
       return this.each(function() {
             $(this).each(function() {
-                  $(this).unbind('dblclick')
+                  $(this).unbind('dblclick');
                 });
           });
     },
     /* movable options selectboxes */
     makemovable : function() {
-      var selectboxes = $(this);	
+      var selectboxes = $(this);
       $(selectboxes).each(function() {
         $.log('item'+$(this).attr('class')+': '+$(this).attr('name'));
-        $(this).find('option').on('dblclick', function(){_move(selectboxes, this);});
+        var _that = this;
+        $(this).find('option').one('dblclick', function(){ 
+            _move(selectboxes, this);
+        });
       });
     }
   };
@@ -126,13 +129,28 @@
                     return true; /* skip */
                 }
                 if($(_obj2).attr('name') == $(_clickedSelectbox).attr('name')){
-                    var _selectbox = $(_clickedSelectbox).unbind('dblclick');
-                    $(_selectbox).removeOption($(_clicked).val()).find('option');                    
+                    var _selectbox = $(_clickedSelectbox);
+                    $(_clicked).unbind('dblclick');
+                    $(_selectbox).removeOption($(_clicked).val()).find('option');
                 }else{
                     $(_obj2).addOption($(_clicked).val(),$(_clicked).text());
-                    $(_obj2).find('option').on('dblclick', function(){_move(selectboxes, this);});
+                    $(_obj2).find('option').one('dblclick', function(){ 
+                        _move(selectboxes, this);
+                        // $.when(_move(selectboxes, this)).done(function(boxes, _that){_sort(boxes,_that, 'val')});
+                        // _sort(selectboxes,this, 'val');
+                    });
                 }
-            });  
+            });
+            if($(_clickedSelectbox).attr('name')){
+                _sort(selectboxes,_clicked, 'val');
+            }
+  };
+  /**
+   * Sortieren der Selectboxes
+   * @param string  - sortby: val | text
+   */
+  function _sort(selectboxes,_clicked, sortby){
+        $.log('Sorting selectboxes '+$(selectboxes).length+' by '+sortby); 
   };
   $.fn.movableSelect = function(method) {
 
