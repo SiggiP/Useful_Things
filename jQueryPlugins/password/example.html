@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title> </title>
+  <link href="../3rd/bootstrap.min.css" rel="stylesheet" media="screen" />
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
+  <script type="text/javascript" src="../3rd/jquery.log.js" ></script>
+    <script type="text/javascript" src="jquery.passvalidation.js" ></script>
+    
+    <script type="text/javascript">
+    jQuery(document).ready(function(){
+    	jQuery('input[type=password]').passvalidation({
+    		 'login': 'input[name=login]'
+    	});
+    });
+    </script>
+ </head>
+ <body>
+ <div class="container">
+    <form class="form-horizontal" action="#" name="pwdForm">
+    <div class="row-fluid">
+        <div class="span6">
+            <fieldset>
+                <legend>Login Data</legend>
+                <div class="control-group">
+                <label class="control-label">Login:</label>
+                <div class="controls">
+                <input class="input-block-level" type="text" name="login" />
+                </div>
+                </div>
+ 
+                <div class="control-group">
+			    <label class="control-label">Password:</label>
+				<div class="controls">
+				<input class="input-block-level" type="password" name="passwd" />
+				</div>
+				</div>
+				
+				<div class="control-group">
+				<label class="control-label">Confirm Password:</label>
+				<div class="controls">				
+				<input class="input-block-level" type="password" name="passwd2" />
+				</div>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+ 
+    </form>
+ </div>
+ </body>
+</html>
