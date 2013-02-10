@@ -1,7 +1,7 @@
 !(function($){
     'use strict';
 	$.fn.passvalidation = function(){
-	   var options, weight, colorize, checkweight, checkpassword;
+	   var options, weight, colorize, checkweight, checkpassword, loginVal;
 	   
 	   options = $.extend({'minLength': 8
 	                      ,'regularExp': ''
@@ -41,10 +41,13 @@
 	       if(specialChars){
 	           weight += (pwdLength-specialChars.length>2?2:0);
 	       }
-	       if('' !== options.login){
-	           if(val.match(new RegExp(options.login,'g'))){
-	               weight -= (pwdLength-options.login.length === 0 ? weight : 1);	           	
-	           }
+	       // TODO: does'nt work currently
+	       if('' !== options.login && $(options.login).is('input')){
+	       	   if('' != (loginVal = $(options.login).val())){
+    	           if(val.match(new RegExp(loginVal,'g'))){
+    	               weight -= (pwdLength-options.login.length === 0 ? weight : 1);	           	
+    	           }
+	       	   }
 	       }
 	       if(weight >= 6){
 	           $.log(val+' weight: '+weight);
