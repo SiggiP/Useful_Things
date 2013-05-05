@@ -8,6 +8,85 @@
  */
 
 /**
+ * 0. Basis-Plugin - SelectboxHelper
+ */
+;
+!(function($){
+    var methods = {
+        init: function(){
+            return this.each(function(){
+                 collection.push( {'name': $(this).attr('name'), 'id': $(this).attr('id'), 'data': $(this).data(), 'options': $(this).find('option')} );
+                 $(this).on('change',function(){
+                    console.log('changed '+$(this).attr('name'));
+                 });
+            });
+        },
+        addOption: function(){
+            console.log('what: '+$(this).attr('name')+' option: '+(typeof arguments[0]));
+            console.log('called addOption: '+arguments[0]);
+            var option2add = arguments[0], select = this, optionObject;
+            if(option2add instanceof Array){
+                $.each(option2add, function(idx, element){
+                   if(element instanceof $){
+                       console.log('add jQuery-Option');
+                       optionObject = $(element);
+                   }else{
+                       console.log('add data-Option');
+                       optionObject = $('<option></option>');
+                       optionObject.val(element.value)
+                                   .prop('selected', element.selected)
+                                   .data(element.data);
+                   }
+                   $(select).append(optionObject);
+                });
+            }
+        },
+        removeOption: function(){
+            console.log('what: '+$(this).attr('name')+' option: '+(typeof arguments[0]));
+            var option2remove = arguments[0];
+            if(option2remove instanceof RegExp){
+               console.log('remove by regExp');
+               $(this).find('option').each(function(idx, element){
+                   if(option2remove.test($(element).val()) !== false && $(element).val() !== '0'){
+                       $(element).remove();
+                   }
+               });
+            }else if(option2remove instanceof Array){
+               console.log('remove by Array');
+               $(this).find('option').each(function(idx, element){
+                   if(-1 !== $.inArray($(element).val(),option2remove)){
+                       $(element).remove();
+                   }
+               });
+            }else if(arguments[0] instanceof String){
+               console.log('remove by String');
+               $(this).find('option').each(function(idx, element){
+                   if($(element).val() === option2remove){
+                       $(element).remove();
+                   }
+               });
+            }else if(arguments[0] instanceof Number){
+               console.log('remove by Number');
+               $(this).find('option').each(function(idx, element){
+                   if(idx === option2remove){
+                       $(element).remove();
+                   }
+               });
+            }           
+            console.log('called removeOption: '+arguments[0]);            
+        }
+    },collection = [];
+    $.fn.selectBoxHelper = function( method ){
+        if (methods[method]) {
+          return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
+        } else if ( typeof method === 'object' || !method ){
+          return methods.init.apply( this, arguments );
+        } else {
+          $.error( 'Method' + method + ' does not exist on jQuery.selectBoxHelper' );
+        }
+    };
+})(window.jQuery);
+/**
  * 1. plugin: uniqueSelectbox
  * Only select options with the same value once in a set
  * of multiple selectboxes
@@ -20,7 +99,7 @@
  * 
  */
 ;
-(function($) {
+!(function($) {
   /* Default Options */
   var options = {/* later */};
   var methods = {
@@ -28,6 +107,7 @@
       // extending options
       options = $.extend(options, opts);
       return this.each(function() {
+              $(this).selectBoxHelper();
           }).uniqueSelect('makeunique');
     },
     destroy : function() {
@@ -89,14 +169,14 @@
  * @url https://github.com/SiggiP/Useful_Things
  * 
  */
-(function($) {
+!(function($) {
   /* Default Options */
   var options = {/* later */};
   var methods = {
     init : function(opts) {
       // extending options
-      options = $.extend(options, opts);
-      return $(this).each(function() {            
+      options = $.extend(options, opts);      
+      return this.each(function() {         	     
           }).movableSelect('makemovable');
     },
     destroy : function() {
@@ -133,9 +213,9 @@
                 if($(_obj2).attr('name') == $(_clickedSelectbox).attr('name')){
                     var _selectbox = $(_clickedSelectbox);
                     $(_clicked).unbind('dblclick');
-                    $(_selectbox).removeOption($(_clicked).val()).find('option');
+                    $(_clickedSelectbox).selectBoxHelper('removeOption', $(_clicked).val()).find('option');
                 }else{
-                    $(_obj2).addOption($(_clicked).val(),$(_clicked).text());
+                    $(_obj2).selectBoxHelper('addOption', $(_clicked));
                     $(_obj2).find('option').one('dblclick', function(){ 
                         _move(selectboxes, this);
                     });
