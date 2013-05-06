@@ -65,109 +65,17 @@ TGWNN_DIALOG_MODEL = Backbone.Model.extend({
      * @param   object  -   options
      */
     tgwnnDialog = function(options){
-    	var minTop = 20
-    	,$minimize = $('<li class="dialogMinimize" title="close" id="minimize-dialog">&nbsp;</li>')
+    	var $minimize = $('<li class="dialogMinimize" title="close" id="minimize-dialog">&nbsp;</li>')
     	,$close = $('<li class="dialogClose" title="" id="close-dialog">&nbsp;</li>')
     	,self = this;
         
         this.$dialog = $('<div><div>');
-        
+               
         this.mData = new TGWNN_DIALOG_MODEL(options);
-            	       
+        
         // id dialog already exists -> remove
         G_TGWNN_DIALOG_FACTORY.removeDialog(this);
-               
-        /**
-         * shorthand to get position info from model
-         * @return  object
-         */
-        this.position = function(){
-            return this.mData.get('position');
-        };
-        this.setLastPosition = function(){
-            this.mData.set({'lastPosition': $.extend(this.mData.get('lastPosition'),{'top': this.$dialog.css('top'), 'left': this.$dialog.css('left'), 'zIndex': this.$dialog.css('zIndex')})});
-        };
-        this.setPosition = function(position){
-            var newPosition = $.extend(this.mData.get('position'),position);
-            this.mData.changePosition(this.mData.get('position'));
-            this.$dialog.css({'top': this.mData.get('position').top, 'left': this.mData.get('position').left, 'z-index': this.mData.get('position').zIndex});
-        };
-        this.focus = function(){
-        	if(false === this.mData.get('minimized')) {
-                G_TGWNN_DIALOG_FACTORY.setFocus(this);
-            }
-        };        
-        /**
-         * removes dialog from DOM
-         */
-        this.remove = function(){
-        	if(typeof this.mData.get('onHide') === 'function'){
-        	   this.mData.get('onHide')(this);
-        	}
-        	G_TGWNN_DIALOG_FACTORY.removeDialog(this);            
-        };
-        this.minimize = function(){
-        	var _headerHeight, _bottom, _right, _left;
-            
-            this.setLastPosition();
-            
-            this.mData.set({'width': $('#tgwnn-dialog-content'+this.mData.get('uid')).innerWidth()});
-            jQuery('#tgwnn-dialog-content'+this.mData.get('uid')).hide();
-            
-            // neue Position - rechts unten im sichtbaren Bereich
-            _headerHeight = $(this.mData.getSelector()+' .tgwnn-dialog-drag').innerHeight()+14;
-            _bottom = $(window).height()+$(document).scrollTop()-_headerHeight;
-            _right = $(window).width()-this.$dialog.innerWidth();
-            _left = 20;
-            
-            if(this.mData.get('minimizeTo') === 'right'){
-                this.$dialog.animate({'top':_bottom, 'left':_right},this.mData.get('animateDuration'),function(){ self.mData.get('onMinimize')(self); });
-            }else{
-                this.$dialog.animate({'top':_bottom, 'left':_left},this.mData.get('animateDuration'),function(){ self.mData.get('onMinimize')(self); });
-            }
-            this.mData.set({'minimized':true});
-            /**/
-        };
-        /**
-         * restores minimized dialogs to their old position
-         */
-        this.restore = function(){
-            $('#tgwnn-dialog-content'+this.mData.get('uid')).innerWidth(this.mData.get('width')).show();                            
-            this.$dialog.animate(this.mData.get('lastPosition')
-                                 ,this.mData.get('animateDuration')
-                                 ,function(){ 
-                                    self.mData.get('onRestore')(self);
-                                    self.mData.set({'minimized':false});
-                                    G_TGWNN_DIALOG_FACTORY.setFocus(self);
-                                 }
-                                );
-        };
-        /**
-         * recalculates start position of Dialog und stores
-         * previous position in lastposition
-         */
-        this.setCenter = function(){            
-            var position = this.mData.get('position'), defaultOffset = 30, offsetLeft = defaultOffset, offsetTop = defaultOffset;
-            this.mData.set({'lastPosition': position});
-            position.scrollTop = $(document).scrollTop();
-            position.scrollLeft = $(document).scrollLeft();
-            position.top = (($(window).height() - this.$dialog.innerHeight()) / 2) - (minTop)+$(document).scrollTop();
-            position.top = (position.top < 20 ? 20 : position.top);
-            position.left = ($(window).width() < $('body').width()) ? 0 : ($('body').width() - $(window).width()) / 2;
-            position.left = ($(document).scrollLeft() + (($(window).width() - this.$dialog.innerWidth()) / 2) + position.left);
-            position.zIndex = G_TGWNN_DIALOG_FACTORY.getMaxZIndex()+1;
-            /* offset of multiple dialogs */
-            
-            $.each(G_TGWNN_DIALOG_FACTORY.DialogCollection, function(idx, obj){
-                if(obj.mData.get('uid') != self.mData.get('uid')){
-                	offsetLeft = Math.max(offsetLeft, defaultOffset)+defaultOffset;
-                    offsetTop = Math.max(offsetTop, defaultOffset)+defaultOffset;
-                }
-            });
-            position.left = (position.left+offsetLeft)+'px';
-            position.top  = (position.top+offsetTop)+'px';           
-            this.mData.changePosition(position);
-        };        
+        
         /**
          * creates the DOM structure and initiates some events
          * @return object   - dialog
@@ -245,132 +153,230 @@ TGWNN_DIALOG_MODEL = Backbone.Model.extend({
             });           
            return this;
         };
-        /**
-         * displays dialog
-         */
-        this.show = function(){
-        	
-            this.$dialog.show(1,function(){
-                     // Triggering the callback if set                     
-                     $.isFunction(self.mData.get('onShow')) && self.mData.get('onShow')(self);
-                
-                     $('.tgwnn-dialog-drag').css('cursor', 'move');
-                 
-                     $(self.mData.getSelector()).draggable({'handle': '.tgwnn-dialog-drag'
-                                                 ,'opacity': self.mData.get('dragOpacity')
-                                                 ,'containment': 'window'
-                                                 ,'stop': function(e,ui){
-                                                            self.mData.changePosition({'top': self.$dialog.css('top')
-                                                                                      ,'left': self.$dialog.css('left')
-                                                                                      ,'zIndex': self.$dialog.css('z-index')
-                                                                                      ,'scrollTop': $(document).scrollTop()
-                                                                                      ,'scrollLeft': $(document).scrollLeft()
-                                                                                      });
-                                                          }
-                                                 });
-                     
-                     $.isFunction(self.mData.get('onFinish')) && self.mData.get('onFinish')(self);                
-            });
-        };        
+          
         return this.create();
-    },
+    };
+    /**
+     * shorthand to get position info from model
+     * @return  object
+     */
+    tgwnnDialog.prototype.position = function(){
+        return this.mData.get('position');
+    };
+    /**
+     * displays dialog
+     */
+    tgwnnDialog.prototype.show = function(){
+        var self = this;
+        this.$dialog.show(1,function(){
+                 // Triggering the callback if set                     
+                 $.isFunction(self.mData.get('onShow')) && self.mData.get('onShow')(self);
+            
+                 $('.tgwnn-dialog-drag').css('cursor', 'move');
+             
+                 $(self.mData.getSelector()).draggable({'handle': '.tgwnn-dialog-drag'
+                                             ,'opacity': self.mData.get('dragOpacity')
+                                             ,'containment': 'window'
+                                             ,'stop': function(e,ui){
+                                                        self.mData.changePosition({'top': self.$dialog.css('top')
+                                                                                  ,'left': self.$dialog.css('left')
+                                                                                  ,'zIndex': self.$dialog.css('z-index')
+                                                                                  ,'scrollTop': $(document).scrollTop()
+                                                                                  ,'scrollLeft': $(document).scrollLeft()
+                                                                                  });
+                                                      }
+                                             });
+                 
+                 $.isFunction(self.mData.get('onFinish')) && self.mData.get('onFinish')(self);                
+        });
+    };      
+    tgwnnDialog.prototype.setLastPosition = function(){
+    	var self = this;
+        this.mData.set({'lastPosition': $.extend(this.mData.get('lastPosition'),{'top': this.$dialog.css('top'), 'left': this.$dialog.css('left'), 'zIndex': this.$dialog.css('zIndex')})});
+    };
+    tgwnnDialog.prototype.setPosition = function(position){
+    	var self = this,
+        newPosition = $.extend(this.mData.get('position'),position);
+        this.mData.changePosition(this.mData.get('position'));
+        this.$dialog.css({'top': this.mData.get('position').top, 'left': this.mData.get('position').left, 'z-index': this.mData.get('position').zIndex});
+    };
+    tgwnnDialog.prototype.focus = function(){
+        var self = this;
+        if(false === this.mData.get('minimized')) {
+            G_TGWNN_DIALOG_FACTORY.setFocus(this);
+        }
+    };   
+    /**
+     * removes dialog from DOM
+     */
+    tgwnnDialog.prototype.remove = function(){
+    	var self = this;
+        if(typeof this.mData.get('onHide') === 'function'){
+           this.mData.get('onHide')(this);
+        }
+        G_TGWNN_DIALOG_FACTORY.removeDialog(this);            
+    };
+    tgwnnDialog.prototype.minimize = function(){
+        var self = this, _headerHeight, _bottom, _right, _left;
+        
+        this.setLastPosition();
+        
+        this.mData.set({'width': $('#tgwnn-dialog-content'+this.mData.get('uid')).innerWidth()});
+        jQuery('#tgwnn-dialog-content'+this.mData.get('uid')).hide();
+        
+        // neue Position - rechts unten im sichtbaren Bereich
+        _headerHeight = $(this.mData.getSelector()+' .tgwnn-dialog-drag').innerHeight()+14;
+        _bottom = $(window).height()+$(document).scrollTop()-_headerHeight;
+        _right = $(window).width()-this.$dialog.innerWidth();
+        _left = 20;
+        
+        if(this.mData.get('minimizeTo') === 'right'){
+            this.$dialog.animate({'top':_bottom, 'left':_right},this.mData.get('animateDuration'),function(){ self.mData.get('onMinimize')(self); });
+        }else{
+            this.$dialog.animate({'top':_bottom, 'left':_left},this.mData.get('animateDuration'),function(){ self.mData.get('onMinimize')(self); });
+        }
+        this.mData.set({'minimized':true});
+        /**/
+    };
+    /**
+     * restores minimized dialogs to their old position
+     */
+    tgwnnDialog.prototype.restore = function(){
+        var self = this;
+        $('#tgwnn-dialog-content'+this.mData.get('uid')).innerWidth(this.mData.get('width')).show();                            
+        this.$dialog.animate(this.mData.get('lastPosition')
+                             ,this.mData.get('animateDuration')
+                             ,function(){ 
+                                self.mData.get('onRestore')(self);
+                                self.mData.set({'minimized':false});
+                                G_TGWNN_DIALOG_FACTORY.setFocus(self);
+                             }
+                            );
+    };
+    /**
+     * recalculates start position of Dialog und stores
+     * previous position in lastposition
+     */
+    tgwnnDialog.prototype.setCenter = function(){            
+        var self = this, position = this.mData.get('position'), defaultOffset = 30, offsetLeft = defaultOffset, offsetTop = defaultOffset, minTop = 20;
+        this.mData.set({'lastPosition': position});
+        position.scrollTop = $(document).scrollTop();
+        position.scrollLeft = $(document).scrollLeft();
+        position.top = (($(window).height() - this.$dialog.innerHeight()) / 2) - (minTop)+$(document).scrollTop();
+        position.top = (position.top < 20 ? 20 : position.top);
+        position.left = ($(window).width() < $('body').width()) ? 0 : ($('body').width() - $(window).width()) / 2;
+        position.left = ($(document).scrollLeft() + (($(window).width() - this.$dialog.innerWidth()) / 2) + position.left);
+        position.zIndex = G_TGWNN_DIALOG_FACTORY.getMaxZIndex()+1;
+        /* offset of multiple dialogs */
+        
+        $.each(G_TGWNN_DIALOG_FACTORY.DialogCollection, function(idx, obj){
+            if(obj.mData.get('uid') != self.mData.get('uid')){
+                offsetLeft = Math.max(offsetLeft, defaultOffset)+defaultOffset;
+                offsetTop = Math.max(offsetTop, defaultOffset)+defaultOffset;
+            }
+        });
+        position.left = (position.left+offsetLeft)+'px';
+        position.top  = (position.top+offsetTop)+'px';           
+        this.mData.changePosition(position);
+    };        
     /* end Dialog */
     
     /* DialogFactory */
-    tgwnnDialogFactory = function(){        
+    var tgwnnDialogFactory = function(){        
         // collection of created dialogs
         this.DialogCollection = [];
         var self = this;
-        zIndex = 1000; // zIndex start        
+        zIndex = 1000; // zIndex start           
         
-        /**
-         * max. z-index
-         * @return int
-         */
-        this.getMaxZIndex = function(){
-        	if(this.DialogCollection.length > 1){
-            	$.each(this.DialogCollection, function(idx,obj){
-            		zIndex = Math.max(zIndex,obj.position().zIndex);
-            	});
-        	}
-        	return zIndex;
-        }; 
-        /* adds an dialog to the collection
-         * if dialog exists, the properties will be updated
-         * @param   object  -   tgwnnDialog
-         */
-        this.addDialog = function(dialog){            
-        	this.DialogCollection.push(dialog);            
-            return dialog;
-        };
-        /**
-         * recieves dialog from collection
-         * @param   int -   Dialog.uid
-         */
-        this.getDialog = function(uid){ 
-        	var found = false;
-        	$.each(this.DialogCollection, function(idx, obj){
-        	   if(obj.mData.get('uid') === uid){
-        	       found = obj;
-        	       return false;
-        	   }        	
-        	});
-        	return found;
-        };
-        this.openDialog = function(uid){
-            this.getDialog(uid).show();
-        };
-        /**
-         * creates a new dialog object and add it to the collection
-         * @return  object  -   tgwnnDialog
-         */
-        this.createDialog = function(){
-            
-            var options = $.extend({'title': 'TGWNN - Dialog'
-                                   ,'contentloader': 'Fehler: kein Content festgelegt'
-                                   ,'modal': false
-                                   }
-                                   ,arguments[0]);
-            dialog = new tgwnnDialog(options);
-            
-            if(dialog.mData.get('button') !== false){
-            	dialog.mData.get('button').off('click');
-                dialog.mData.get('button').on('click', function(){
-                    self.createDialog(options);
-                });            	
-            }
-            return this.addDialog(dialog);
-        };
-        /**
-         * removes dialog from DOM and from collection
-         * @param   object - dialog
-         */
-        this.removeDialog = function(dialog){    
-            if(dialog instanceof tgwnnDialog){
-                $(dialog.mData.getSelector()).remove();
-                this.DialogCollection = _.filter(this.DialogCollection, function(obj){
-                    return obj.mData.get('uid') != dialog.mData.get('uid');                
-                });
-        	}
-        };
-        /**
-         * brings dialog in front of all others
-         * @param   object  - dialog
-         */
-        this.setFocus = function(dialog){
-            var aktualZ = dialog.mData.get('position').zIndex;            
-            var maxZ = this.getMaxZIndex();
+                
+    };
+    /**
+     * creates a new dialog object and add it to the collection
+     * @return  object  -   tgwnnDialog
+     */
+    tgwnnDialogFactory.prototype.createDialog = function(){
+        
+        var options = $.extend({'title': 'TGWNN - Dialog'
+                               ,'contentloader': 'Fehler: kein Content festgelegt'
+                               ,'modal': false
+                               }
+                               ,arguments[0]);
+        dialog = new tgwnnDialog(options);
+        
+        if(dialog.mData.get('button') !== false){
+            dialog.mData.get('button').off('click');
+            dialog.mData.get('button').on('click', function(){
+                self.createDialog(options);
+            });             
+        }
+        return this.addDialog(dialog);
+    };   
+    /**
+     * max. z-index
+     * @return int
+     */
+    tgwnnDialogFactory.prototype.getMaxZIndex = function(){
+    	var self = this;
+        if(this.DialogCollection.length > 1){
             $.each(this.DialogCollection, function(idx,obj){
-                if(obj.mData.get('minimized') === true){ return true;}                                
-                if(obj.mData.get('uid') === dialog.mData.get('uid')){
-                    // move up
-                    dialog.setPosition({'top': dialog.$dialog.css('top'),'left': dialog.$dialog.css('left'),'zIndex': maxZ});
-                }else{
-                	// move down
-                    obj.setPosition({'top': obj.$dialog.css('top'),'left': obj.$dialog.css('left'),'zIndex': maxZ-1});
-                }
+                zIndex = Math.max(zIndex,obj.position().zIndex);
             });
-        };
+        }
+        return zIndex;
+    }; 
+    /**
+     * brings dialog in front of all others
+     * @param   object  - dialog
+     */
+    tgwnnDialogFactory.prototype.setFocus = function(dialog){    	
+        var self = this, aktualZ = dialog.mData.get('position').zIndex, maxZ = this.getMaxZIndex();
+        $.each(this.DialogCollection, function(idx,obj){
+            if(obj.mData.get('minimized') === true){ return true;}                                
+            if(obj.mData.get('uid') === dialog.mData.get('uid')){
+                // move up
+                dialog.setPosition({'top': dialog.$dialog.css('top'),'left': dialog.$dialog.css('left'),'zIndex': maxZ});
+            }else{
+                // move down
+                obj.setPosition({'top': obj.$dialog.css('top'),'left': obj.$dialog.css('left'),'zIndex': maxZ-1});
+            }
+        });
+    };
+    /**
+     * removes dialog from DOM and from collection
+     * @param   object - dialog
+     */
+    tgwnnDialogFactory.prototype.removeDialog = function(dialog){    
+        if(dialog instanceof tgwnnDialog){
+            $(dialog.mData.getSelector()).remove();
+            this.DialogCollection = _.filter(this.DialogCollection, function(obj){
+                return obj.mData.get('uid') != dialog.mData.get('uid');                
+            });
+        }
+    };    
+    /* adds an dialog to the collection
+     * if dialog exists, the properties will be updated
+     * @param   object  -   tgwnnDialog
+     */
+    tgwnnDialogFactory.prototype.addDialog = function(dialog){            
+        this.DialogCollection.push(dialog);            
+        return dialog;
+    };
+    /**
+     * recieves dialog from collection
+     * @param   int -   Dialog.uid
+     */
+    tgwnnDialogFactory.prototype.getDialog = function(uid){ 
+        var found = false;
+        $.each(this.DialogCollection, function(idx, obj){
+           if(obj.mData.get('uid') === uid){
+               found = obj;
+               return false;
+           }            
+        });
+        return found;
+    };
+    tgwnnDialogFactory.prototype.openDialog = function(uid){
+        this.getDialog(uid).show();
     };
     /* end DialogFactory */
     
